@@ -1,10 +1,8 @@
 ---
-title: "Reproducible Research Course Project - Part I"
+title: "Reproducible Research Course Project"
 author: Arthi Murugesan
 date: March 6,2016
-output: 
-  pdf_document:
-    toc: true
+
 ---
 # Introduction
 
@@ -41,7 +39,7 @@ median_steps<-round(median(steps_per_day$steps), 2)
 
 ```
 
-The mean number of steps taken per day is `r mean_steps`, and the median is `r median_steps`. As we can see, the mean and median are not the same.
+The mean number of steps taken per day is 1.07662, and the median is 1.076510. As we can see, the mean and median are not the same.
 
 ## What is the average daily activity pattern?
 
@@ -82,7 +80,7 @@ mean_steps<-round(mean(steps_per_day_corrected$steps), 2)
 median_steps<-round(median(steps_per_day_corrected$steps), 2)
 
 ```
-There are total of `r sum(is.na(activity$steps))` missing steps. The steps are replaced by the average steps taken for that interval in general. Once this is corrected, in the final dataset we noticed the mean number of steps taken are `r mean(steps_per_day_corrected$steps)`, and the median number of steps taken are `r median(steps_per_day_corrected$steps)`. This shows the mean and the median being the same.
+There are total of `r sum(is.na(activity$steps))` missing steps. The steps are replaced by the average steps taken for that interval in general. Once this is corrected, in the final dataset we noticed the mean number of steps taken are 1.07662, and the median number of steps taken are 1.07662. This shows the mean and the median being the same.
 
 ## Are there differences in activity patterns between weekdays and weekends?
 

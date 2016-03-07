@@ -1,20 +1,95 @@
-# Reproducible Research: Peer Assessment 1
+---
+title: "Reproducible Research Course Project - Part I"
+author: Arthi Murugesan
+date: March 6,2016
+output: 
+  pdf_document:
+    toc: true
+---
+# Introduction
 
+This report is the first peer assignment for the reproducible research. The exploratory analysis of daily steps taken is provided as part of the report, along with making the code reproducible.
+
+The activity data, is as the data that was downloaded from https://d396qusza40orc.cloudfront.net/repdata%2Fdata%2Factivity.zip, as of 6th March 2016. The dataset consists of steps taken per day, on a 5 minute interval. In total, there are 17,568 observations available.
 
 ## Loading and preprocessing the data
 
+The data was loaded after removing the old environment variables present in R.
+```{r}
+
+#Remove all variables in the R environment - to start fresh
+rm(list=ls(all=TRUE)) 
+
+#Load all the activity data
+
+activity <- read.csv('activity.csv', header = T)
+head(activity)
+summary(activity)
+
+#Preprocess data to remove any data with NULL
+steps_per_day<-aggregate(steps~date,data=activity,sum,na.rm=TRUE)
+steps_per_interval <-aggregate(steps~interval,data=activity,mean,na.rm=TRUE)
+```
 
 
 ## What is mean total number of steps taken per day?
 
+```{r}
+hist(steps_per_day$steps,breaks = 75,main="Steps per day",xlab="Day Number(in progressing order)", ylab="Steps")
+mean_steps<-round(mean(steps_per_day$steps), 2)
+median_steps<-round(median(steps_per_day$steps), 2)
 
+```
+
+The mean number of steps taken per day is `r mean_steps`, and the median is `r median_steps`. As we can see, the mean and median are not the same.
 
 ## What is the average daily activity pattern?
 
+```{r}
 
+plot(steps~interval,data=steps_per_interval,type="l",col='green',main='Steps per interval')
+
+#Find Interval That Has The Maximum Avg Steps
+max_steps <- steps_per_interval[which.max(steps_per_interval$steps),]
+
+max_steps
+
+#Collect Cooridinates of The Max Interval For Graphing
+points(max_steps$interval,  max_steps$steps, col = 'red', lwd = 3, pch = 10)
+```
+
+Here is the plot for the average daily activity pattern. As noticed, the average activity peaks at the interval `r max_steps$interval` with the average number of steps taken being `r max_steps$steps`.
 
 ## Imputing missing values
 
+```{r}
+sum(is.na(activity$steps))
 
+steps_per_interval$avg_steps<-steps_per_interval$steps
+steps_per_interval$steps <- NULL
+
+activity_final <- merge(activity, steps_per_interval, by="interval")
+activity_final <- activity_final[order(activity_final$date),]
+
+activity_final$steps[is.na(activity_final$steps)] <- activity_final$avg_steps[is.na(activity_final$steps)]
+
+
+steps_per_day_corrected<-aggregate(steps~date,data=activity_final,sum,na.rm=TRUE)
+
+hist(steps_per_day_corrected$steps,breaks = 75,main="Steps per day (excluding NA)",xlab="Day Number(in progressing order)", ylab="Steps")
+
+mean_steps<-round(mean(steps_per_day_corrected$steps), 2)
+median_steps<-round(median(steps_per_day_corrected$steps), 2)
+
+```
+There are total of `r sum(is.na(activity$steps))` missing steps. The steps are replaced by the average steps taken for that interval in general. Once this is corrected, in the final dataset we noticed the mean number of steps taken are `r mean(steps_per_day_corrected$steps)`, and the median number of steps taken are `r median(steps_per_day_corrected$steps)`. This shows the mean and the median being the same.
 
 ## Are there differences in activity patterns between weekdays and weekends?
+
+We notice the activities peaked during the early part of the day on weekdays. While in the case of weekends, the activities are almost average along the day but gradually reducing from earlier in the day to latter part of the day.
+
+```{r}
+activity_final$day_type<-as.factor(ifelse(as.POSIXlt(as.Date(activity_final$date))$wday%%6==0,"week end","week day"))
+steps_per_interval_day_type <- aggregate(steps~interval+day_type,activity_final,mean)
+xyplot(steps~interval|day_type,data=steps_per_interval_day_type,aspect=1/2,type="l",col='red',ylab='No of Steps',xlab="Interval",main='Steps by day type')
+```
